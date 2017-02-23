@@ -34,6 +34,11 @@ def get_description(all_items):
     if len(description_list) > 0: description = max(description_list[:3], key = len)
     return description
 
+def unique_order(seq):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
+
 def get_book_props(current_book_link):
 
     all_items = request_link(current_book_link)
@@ -50,12 +55,12 @@ def get_book_props(current_book_link):
     book_type = search_for_text(all_spans, "bookFormatType.*\">(.*?)<")[0]
     no_of_pages = convert_to_int(search_for_text(all_spans, "numberOfPages.*\">([\d\\.,]*).*<")[0])
 
-    published_on = ""
-    isbn = ""
-    genre_1 = ""
-    genre_2 = ""
-    pages = ""
-    return pd.DataFrame([(rating,votes,description)])
+    first_published = search_for_text(all_items.findAll("nobr"), "first published\s(.*\d)")
+    isbn13 = search_for_text(all_spans, "itemprop=\"isbn\">(.*?)<")[0]
+
+    genres = unique_order(search_for_text(all_links, "(?<!greyText\s)bookPageGenreLink.*>(.*?)<"))
+    return pd.DataFrame([(book_name, author, rating, votes, description, book_type,
+                          no_of_pages, first_published, isbn13, genres[0])])
 
 def get_book_props(current_book_link):
     all_items = request_link(current_book_link)
@@ -77,7 +82,8 @@ if __name__ == "__main__":
     book_db_file = "goodreads_list_props.csv"
     #os.remove(book_ratings_file_name)
     if not os.path.exists(book_db_file):
-        with open(book_db_file, 'w') as f: f.write("book_name,rating,votes,description\n")
+        with open(book_db_file, 'w') as f:
+            f.write("book_name,author,rating,votes,description,book_type,no_of_pages,first_published,isbn13,genre\n")
 
 
     for p in range(total_pages):
