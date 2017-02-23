@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 from itertools import compress
 
 def convert_to_int(x):
+    if x is None: return None
     return int(x.replace(",", ""))
 
 def request_and_find_type(search_string, tag):
@@ -29,10 +30,10 @@ def get_last_page_num(list_link):
     all_pages = search_for_text(all_links, regexp)
     return max([int(x) for x in all_pages])
 
-def get_description(all_items):
+def get_description(all_spans):
     description = None
-    description_list = search_for_text(all_items, "freeText.*?>(.*)<")
-    if len(description_list) > 0: description = max(description_list[:3], key = len)
+    description_list = search_for_text(all_spans, "freeText.*?>(.*)<")
+    if len(description_list) > 0: description = max(description_list[:2], key = len)
     return description
 
 def unique_order(seq):
@@ -54,7 +55,7 @@ def get_book_props(current_book_link):
     votes = convert_to_int(search_for_text(all_spans, "ratingCount.*?>([\d,]*).*<")[0])
     description = get_description(all_spans)
     book_type = search_for_text(all_spans, "bookFormatType.*\">(.*?)<", True)[0]
-    no_of_pages = convert_to_int(search_for_text(all_spans, "numberOfPages.*\">([\d\\.,]*).*<")[0])
+    no_of_pages = convert_to_int(search_for_text(all_spans, "numberOfPages.*\">([\d\\.,]*).*<", True)[0])
 
     first_published = search_for_text(all_items.findAll("nobr"), "first published\s(.*\d)", ignore_missing = True)[0]
     isbn13 = search_for_text(all_spans, "itemprop=\"isbn\">(.*?)<", ignore_missing = True)[0]
@@ -81,7 +82,7 @@ if __name__ == "__main__":
     goodreads_link = "https://www.goodreads.com/list/show/"
     list_name = "1.Best_Books_Ever"
     list_link = goodreads_link + list_name
-    total_pages = get_last_page_num(list_link); p = 2
+    total_pages = get_last_page_num(list_link); p = 13
 
     book_db_file = "goodreads_list_props.csv"
     #os.remove(book_ratings_file_name)
@@ -90,7 +91,7 @@ if __name__ == "__main__":
             f.write("book_name,author,rating,votes,description,book_type,no_of_pages,first_published,isbn13,genre,link\n")
     book_ratings_db = pd.read_csv(book_db_file, sep = ",", quotechar="\"")
 
-    for p in range(total_pages):
+    for p in range(12, total_pages):
         page_id = '' if p == 0 else "?page=" + str(p + 1)
         current_link = list_link + page_id
         print(current_link)
@@ -98,8 +99,8 @@ if __name__ == "__main__":
         all_books = list(set(search_for_text(all_links, "\"(/book/show/.*?)\"")))
         all_book_links = ["https://www.goodreads.com/" + x for x in all_books]
         # [process_book(x, book_ratings_db, book_db_file) for x in all_book_links]
-        pool = Pool(16)
+        pool = Pool(20)
         list(pool.map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
         # list(map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
 
-current_book_link = "https://www.goodreads.com//book/show/7604.Lolita"
+current_book_link = "https://www.goodreads.com//book/show/318525.Red_Storm_Rising"
