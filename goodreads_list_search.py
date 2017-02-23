@@ -61,6 +61,7 @@ def get_book_props(current_book_link):
     isbn13 = search_for_text(all_spans, "itemprop=\"isbn\">(.*?)<", ignore_missing = True)[0]
 
     genres = unique_order(search_for_text(all_links, "(?<!greyText\s)bookPageGenreLink.*>(.*?)<"))
+    if len(genres) == 0: genres = [None]
     return pd.DataFrame([(book_name, author, rating, votes, description, book_type,
                           no_of_pages, first_published, isbn13, genres[0], current_book_link)])
 
@@ -91,7 +92,7 @@ if __name__ == "__main__":
             f.write("book_name,author,rating,votes,description,book_type,no_of_pages,first_published,isbn13,genre,link\n")
     book_ratings_db = pd.read_csv(book_db_file, sep = ",", quotechar="\"")
 
-    for p in range(12, total_pages):
+    for p in range(17, total_pages):
         page_id = '' if p == 0 else "?page=" + str(p + 1)
         current_link = list_link + page_id
         print(current_link)
@@ -99,8 +100,8 @@ if __name__ == "__main__":
         all_books = list(set(search_for_text(all_links, "\"(/book/show/.*?)\"")))
         all_book_links = ["https://www.goodreads.com/" + x for x in all_books]
         # [process_book(x, book_ratings_db, book_db_file) for x in all_book_links]
-        pool = Pool(20)
-        list(pool.map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
-        # list(map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
+        # pool = Pool(20)
+        # list(pool.map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
+        list(map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
 
-current_book_link = "https://www.goodreads.com//book/show/318525.Red_Storm_Rising"
+current_book_link = "https://www.goodreads.com//book/show/18251020-life-song"
