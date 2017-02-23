@@ -47,7 +47,7 @@ def get_book_props(current_book_link):
     all_divs = all_items.findAll("div")
     all_spans = all_items.findAll("span")
 
-    book_name = search_for_text(all_items.findAll("h1"), "bookTitle.*>[\n\s]*(.*?)[\s\n]<")[0]
+    book_name = search_for_text(all_items.findAll("h1"), "bookTitle.*>[\n\s]*(.*?)[\s\n]*<")[0]
     author = search_for_text(all_spans, "authorName.*itemprop=\"name\">(.*?)<")[0]
     rating = float(search_for_text(all_spans, "ratingValue.*?>([\d\\.]*)<")[0])
     votes = convert_to_int(search_for_text(all_spans, "ratingCount.*?>([\d,]*).*<")[0])
@@ -60,20 +60,20 @@ def get_book_props(current_book_link):
 
     genres = unique_order(search_for_text(all_links, "(?<!greyText\s)bookPageGenreLink.*>(.*?)<"))
     return pd.DataFrame([(book_name, author, rating, votes, description, book_type,
-                          no_of_pages, first_published, isbn13, genres[0], link)])
+                          no_of_pages, first_published, isbn13, genres[0], current_book_link)])
 
-def process_book(current_book_link):
+def process_book(current_book_link, book_ratings_db, book_db_file):
     print("Processing: {}".format(current_book_link))
 
-    if current_book_link in book_ratings.link.values:
+    if current_book_link in book_ratings_db.link.values:
         print("Already Processed. Ignoring...")
         return None
 
     book_props = get_book_props(current_book_link)
+    print(book_props.iloc[0].values)
 
     with open(book_db_file, 'a', encoding = 'utf-8') as f:
         book_props.to_csv(f, header = False, index=False)
-
 
 
 if __name__ == "__main__":
@@ -87,6 +87,7 @@ if __name__ == "__main__":
     if not os.path.exists(book_db_file):
         with open(book_db_file, 'w') as f:
             f.write("book_name,author,rating,votes,description,book_type,no_of_pages,first_published,isbn13,genre,link\n")
+    book_ratings_db = pd.read_csv(book_db_file, sep = ",", quotechar="\"")
 
     for p in range(total_pages):
         page_id = '' if p == 0 else "?page=" + str(p + 1)
@@ -94,4 +95,6 @@ if __name__ == "__main__":
         all_links = request_and_find_type(current_link, "a")
         all_books = list(set(search_for_text(all_links, "\"(/book/show/.*?)\"")))
         all_book_links = ["https://www.goodreads.com/" + x for x in all_books]
-        [get_book_props(x, book_db_file) for x in all_book_links]
+        [process_book(x, book_ratings_db, book_db_file) for x in all_book_links]
+
+current_book_link = "https://www.goodreads.com//book/show/7604.Lolita"
