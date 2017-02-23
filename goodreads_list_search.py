@@ -60,16 +60,19 @@ def get_book_props(current_book_link):
 
     genres = unique_order(search_for_text(all_links, "(?<!greyText\s)bookPageGenreLink.*>(.*?)<"))
     return pd.DataFrame([(book_name, author, rating, votes, description, book_type,
-                          no_of_pages, first_published, isbn13, genres[0])])
+                          no_of_pages, first_published, isbn13, genres[0], link)])
 
-def get_book_props(current_book_link):
-    all_items = request_link(current_book_link)
-    output = get_props(all_items)
+def process_book(current_book_link):
+    print("Processing: {}".format(current_book_link))
 
-    # with open(book_ratings_file_name, 'a', encoding = 'utf-8') as f:
-    #     output.to_csv(f, header = False, index=False)
-    return output
+    if current_book_link in book_ratings.link.values:
+        print("Already Processed. Ignoring...")
+        return None
 
+    book_props = get_book_props(current_book_link)
+
+    with open(book_db_file, 'a', encoding = 'utf-8') as f:
+        book_props.to_csv(f, header = False, index=False)
 
 
 
@@ -83,14 +86,12 @@ if __name__ == "__main__":
     #os.remove(book_ratings_file_name)
     if not os.path.exists(book_db_file):
         with open(book_db_file, 'w') as f:
-            f.write("book_name,author,rating,votes,description,book_type,no_of_pages,first_published,isbn13,genre\n")
-
+            f.write("book_name,author,rating,votes,description,book_type,no_of_pages,first_published,isbn13,genre,link\n")
 
     for p in range(total_pages):
-        page = "?page=" + str(p)
-        current_link = list_link + page
+        page_id = '' if p == 0 else "?page=" + str(p + 1)
+        current_link = list_link + page_id
         all_links = request_and_find_type(current_link, "a")
         all_books = list(set(search_for_text(all_links, "\"(/book/show/.*?)\"")))
         all_book_links = ["https://www.goodreads.com/" + x for x in all_books]
-
-        get_book_props(current_book_link)
+        [get_book_props(x, book_db_file) for x in all_book_links]
