@@ -1,3 +1,4 @@
+import sys
 import os, urllib
 import pandas as pd
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -80,10 +81,11 @@ def process_book(current_book_link, book_ratings_db, book_db_file):
 
 
 if __name__ == "__main__":
+    sys.setrecursionlimit(10000)
     goodreads_link = "https://www.goodreads.com/list/show/"
     list_name = "1.Best_Books_Ever"
     list_link = goodreads_link + list_name
-    total_pages = get_last_page_num(list_link); p = 13
+    total_pages = get_last_page_num(list_link); p = 32
 
     book_db_file = "goodreads_list_props.csv"
     #os.remove(book_ratings_file_name)
@@ -92,7 +94,7 @@ if __name__ == "__main__":
             f.write("book_name,author,rating,votes,description,book_type,no_of_pages,first_published,isbn13,genre,link\n")
     book_ratings_db = pd.read_csv(book_db_file, sep = ",", quotechar="\"")
 
-    for p in range(17, total_pages):
+    for p in range(32, total_pages):
         page_id = '' if p == 0 else "?page=" + str(p + 1)
         current_link = list_link + page_id
         print(current_link)
@@ -104,4 +106,4 @@ if __name__ == "__main__":
         # list(pool.map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
         list(map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
 
-current_book_link = "https://www.goodreads.com//book/show/18251020-life-song"
+current_book_link = search_string = "https://www.goodreads.com//book/show/10033.Being_and_Nothingness"
