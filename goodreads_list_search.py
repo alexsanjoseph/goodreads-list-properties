@@ -34,18 +34,22 @@ def get_description(all_items):
     if len(description_list) > 0: description = max(description_list[:3], key = len)
     return description
 
-def get_props(all_items):
+def get_book_props(current_book_link):
 
-    description = get_description(all_items)
-    votes = convert_to_int(search_for_text(all_items, "ratingCount.*?>([\d,]*).*<")[0])
-    rating = float(search_for_text(all_items, "ratingValue.*?>([\d\\.,]*).*<")[0])
-    reviews = float(search_for_text(all_items, "ratingValue.*?>([\d\\.,]*).*<")[0])
+    all_items = request_link(current_book_link)
 
-    class="item" style="display:none"><span class="fn">A Clockwork Orange</span></span>
-    class="authorName" style="display:none"><span class="fn">A Clockwork Orange</span></span>
+    all_links = all_items.findAll("a")
+    all_divs = all_items.findAll("div")
+    all_spans = all_items.findAll("span")
 
-    book_name = search_for_text(all_items, "item.*display\:none.*\"fn\">(.*?)<")[0]
-    author = search_for_text(all_items, "authorName.*itemprop=\"name\">(.*?)<")[0]
+    book_name = search_for_text(all_items.findAll("h1"), "bookTitle.*>[\n\s]*(.*?)[\s\n]<")[0]
+    author = search_for_text(all_spans, "authorName.*itemprop=\"name\">(.*?)<")[0]
+    rating = float(search_for_text(all_spans, "ratingValue.*?>([\d\\.]*)<")[0])
+    votes = convert_to_int(search_for_text(all_spans, "ratingCount.*?>([\d,]*).*<")[0])
+    description = get_description(all_spans)
+    book_type = search_for_text(all_spans, "bookFormatType.*\">(.*?)<")[0]
+    no_of_pages = convert_to_int(search_for_text(all_spans, "numberOfPages.*\">([\d\\.,]*).*<")[0])
+
     published_on = ""
     isbn = ""
     genre_1 = ""
@@ -54,7 +58,7 @@ def get_props(all_items):
     return pd.DataFrame([(rating,votes,description)])
 
 def get_book_props(current_book_link):
-    all_items = request_link(current_book_link, ["span", "h1", "div"])
+    all_items = request_link(current_book_link)
     output = get_props(all_items)
 
     # with open(book_ratings_file_name, 'a', encoding = 'utf-8') as f:
