@@ -73,11 +73,14 @@ def process_book(current_book_link, book_ratings_db, book_db_file):
         print("Already Processed. Ignoring...")
         return None
 
-    book_props = get_book_props(current_book_link)
-    print(book_props.iloc[0].values)
+    try:
+        book_props = get_book_props(current_book_link)
+        print(book_props.iloc[0].values)
 
-    with open(book_db_file, 'a', encoding = 'utf-8') as f:
-        book_props.to_csv(f, header = False, index=False)
+        with open(book_db_file, 'a', encoding = 'utf-8') as f:
+            book_props.to_csv(f, header = False, index=False)
+    except:
+        return None
 
 
 if __name__ == "__main__":
@@ -85,7 +88,7 @@ if __name__ == "__main__":
     goodreads_link = "https://www.goodreads.com/list/show/"
     list_name = "1.Best_Books_Ever"
     list_link = goodreads_link + list_name
-    total_pages = get_last_page_num(list_link); p = 32
+    total_pages = get_last_page_num(list_link); p = 165
 
     book_db_file = "goodreads_list_props.csv"
     #os.remove(book_ratings_file_name)
@@ -94,7 +97,7 @@ if __name__ == "__main__":
             f.write("book_name,author,rating,votes,description,book_type,no_of_pages,first_published,isbn13,genre,link\n")
     book_ratings_db = pd.read_csv(book_db_file, sep = ",", quotechar="\"")
 
-    for p in range(32, total_pages):
+    for p in range(410, total_pages):
         page_id = '' if p == 0 else "?page=" + str(p + 1)
         current_link = list_link + page_id
         print(current_link)
@@ -102,8 +105,8 @@ if __name__ == "__main__":
         all_books = list(set(search_for_text(all_links, "\"(/book/show/.*?)\"")))
         all_book_links = ["https://www.goodreads.com/" + x for x in all_books]
         # [process_book(x, book_ratings_db, book_db_file) for x in all_book_links]
-        # pool = Pool(20)
-        # list(pool.map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
-        list(map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
 
-current_book_link = search_string = "https://www.goodreads.com//book/show/10033.Being_and_Nothingness"
+        pool = Pool(10); list(pool.map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
+        # list(map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
+
+current_book_link = search_string = "https://www.goodreads.com//book/show/20578795-meditation-as-a-way-of-life"
