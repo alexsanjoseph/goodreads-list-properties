@@ -22,6 +22,8 @@ he `Pool` parameter. But I didn't want to give a large number and DOS the system
 
 ## Most Popular Books Dataset
 
+File name - `goodreads_list_props.csv`
+
 I've also included the results of running the script on the Best Books List (which is the largest list in Goodreads AFAIK).
 `https://www.goodreads.com/list/show/1.Best_Books_Ever`
 
