@@ -106,7 +106,7 @@ if __name__ == "__main__":
         all_book_links = ["https://www.goodreads.com/" + x for x in all_books]
         # [process_book(x, book_ratings_db, book_db_file) for x in all_book_links]
 
-        pool = Pool(10); list(pool.map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
+        pool = Pool(4); list(pool.map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
         # list(map(lambda x: process_book(x, book_ratings_db, book_db_file), all_book_links))
 
 current_book_link = search_string = "https://www.goodreads.com//book/show/20578795-meditation-as-a-way-of-life"
