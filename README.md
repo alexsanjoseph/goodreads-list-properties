@@ -1,4 +1,4 @@
-# Goodreads - List Ratings
+# Goodreads - List Properties Database
 
 This script takes the link of a list from the Goodreads and scrapes through each of the pages and find the following properties:
 
@@ -7,11 +7,11 @@ This script takes the link of a list from the Goodreads and scrapes through each
 - rating
 - votes
 - description
-- book_type
+- book_type - Paperback, Hardback, etc.
 - no_of_pages
-- first_published
+- first_published - Date at which the book was published first, if available.
 - isbn13
-- genre
+- genre - The most common tag for the book
 
 It works as of `2017/02/25` but can't guarantee if it will work in the future :D.
 
@@ -25,7 +25,7 @@ he `Pool` parameter. But I didn't want to give a large number and DOS the system
 I've also included the results of running the script on the Best Books List (which is the largest list in Goodreads AFAIK).
 `https://www.goodreads.com/list/show/1.Best_Books_Ever`
 
-It has details of 47610 books.
+It has the details of 47610 books.
 
 
 # Known Bugs
