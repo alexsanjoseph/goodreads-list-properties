@@ -33,4 +33,4 @@ It has details of 47610 books.
 - If there is no description for a book, sometimes the first comment is displayed instead of the description.
 - The script fails for a random reasons for a a very small number of cases, but I haven't spent the time to go and debug the issue since it affect <1% of the cases, and none of the more interesting books (Top 100 pages or so)
 
-Scraping is inherently Please suggest in Issues if there is something else wrong with the scraping
+Scraping is inherently susceptible to bugs so please suggest in Issues if there is something else wrong.
